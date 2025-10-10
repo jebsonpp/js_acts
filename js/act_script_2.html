@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Async Promises with Countdown</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { margin: 5px 0; padding: 8px; }
+    #output { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>Async Promises Demonstration</h2>
+  <input type="text" id="userInput" placeholder="Enter name or number">
+  <div>
+    <button onclick="exampleA()">A</button>
+    <button onclick="exampleB()">B</button>
+    <button onclick="exampleC()">C</button>
+    <button onclick="exampleD()">D</button>
+    <button onclick="exampleE()">E</button>
+    <button onclick="exampleF()">F</button>
+    <button onclick="exampleG()">G</button>
+    <button onclick="exampleH()">H</button>
+    <button onclick="exampleI()">I</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    const output = document.getElementById('output');
+    const print = (msg) => output.innerText = msg;
+
+    // Utility countdown
+    function countdown(seconds) {
+      return new Promise((resolve) => {
+        let timeLeft = seconds;
+        print(`Please wait ${timeLeft} seconds...`);
+        const timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft > 0) {
+            print(`Please wait ${timeLeft} seconds...`);
+          } else {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 1000);
+      });
+    }
+
+    // A.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty, and resolves with the input, greeting the user with “good day, <name of user here>!” on the DOM
+    async function exampleA() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise((resolve, reject) => {
+        if (!name) reject("Input cannot be empty.");
+        else resolve(name);
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // B.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty, and resolves after 5 seconds with the input, greeting the user with “good day, <name of user here>!” on the DOM. 
+    async function exampleB() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise(async (resolve, reject) => {
+        if (!name) reject("Input cannot be empty.");
+        else {
+          await countdown(5);
+          resolve(name);
+        }
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // C.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty, and resolves after 7 seconds with the input, greeting the user with “good day, <name of user here>!” on the DOM. 
+    async function exampleC() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise(async (resolve, reject) => {
+        if (!name) reject("Input cannot be empty.");
+        else {
+          await countdown(7);
+          resolve(name);
+        }
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // D.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty, and resolves with the input being in uppercase format, greeting the user with “good day, <name of user here>!” on the DOM. 
+    async function exampleD() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise((resolve, reject) => {
+        if (!name) reject("Input cannot be empty.");
+        else resolve(name.toUpperCase());
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // E.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty and is less than five characters, and resolves with the input being in uppercase format, greeting the user with “good day, <name of user here>!” on the DOM. 
+    async function exampleE() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise((resolve, reject) => {
+        if (!name || name.length < 5) reject("Input must be at least 5 characters long.");
+        else resolve(name.toUpperCase());
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // F.	We first have an input field asking for the user’s name. Create a Promise that rejects if that input field is empty and is less than five characters, and resolves with the input being in reversed format, greeting the user with “good day, <name of user here>!” on the DOM. 
+    async function exampleF() {
+      const name = document.getElementById('userInput').value.trim();
+      const greetPromise = new Promise((resolve, reject) => {
+        if (!name || name.length < 5) reject("Input must be at least 5 characters long.");
+        else resolve(name.split("").reverse().join(""));
+      });
+
+      try {
+        const result = await greetPromise;
+        print(`Good day, ${result}!`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // G.	We first have an input field asking the user to input a number. Create a Promise that rejects if the inputted value is not an integer and resolves with the integer input being squared, printing the string “<number inputted> is <squared number> when doubled ” on the DOM. 
+    async function exampleG() {
+      const value = document.getElementById('userInput').value.trim();
+      const numberPromise = new Promise(async (resolve, reject) => {
+        const num = parseInt(value);
+        if (isNaN(num)) reject("Please enter a valid integer.");
+        else {
+          await countdown(3);
+          resolve(num * num);
+        }
+      });
+
+      try {
+        const result = await numberPromise;
+        print(`${value} is ${result} when doubled`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // H.	We first have an input field asking the user to input a number. Create a Promise that rejects if the inputted value is not an integer and resolves after 5 seconds with the integer input being cubed, printing the string “<number inputted> is <cubed number> when cubed” on the DOM. 
+    async function exampleH() {
+      const value = document.getElementById('userInput').value.trim();
+      const numberPromise = new Promise(async (resolve, reject) => {
+        const num = parseInt(value);
+        if (isNaN(num)) reject("Please enter a valid integer.");
+        else {
+          await countdown(5);
+          resolve(num ** 3);
+        }
+      });
+
+      try {
+        const result = await numberPromise;
+        print(`${value} is ${result} when cubed`);
+      } catch (err) {
+        print(err);
+      }
+    }
+
+    // I - I.	We first have an input field asking the user to input a number. Create a Promise that rejects if the inputted value is not between 1 and 10 and resolves by printing the string “Yes <number inputted> is between 1 and 10” on the DOM. If the user fails three times to give a number between 1 and 10, we’ll just print “You already failed three times, so no chances anymore”. 
+    let failCount = 0;
+    async function exampleI() {
+      const value = document.getElementById('userInput').value.trim();
+      const numberPromise = new Promise(async (resolve, reject) => {
+        const num = parseInt(value);
+        if (isNaN(num) || num < 1 || num > 10) reject("Number must be between 1 and 10.");
+        else {
+          await countdown(3);
+          resolve(num);
+        }
+      });
+
+      try {
+        const result = await numberPromise;
+        failCount = 0;
+        print(`Yes ${result} is between 1 and 10.`);
+      } catch (err) {
+        failCount++;
+        if (failCount >= 3) {
+          print("You already failed three times, so no chances anymore.");
+        } else {
+          print(`${err} (Attempt ${failCount}/3)`);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
