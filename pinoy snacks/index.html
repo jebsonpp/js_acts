@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Classic Pinoy Snacks — Order</title>
+<style>
+body{font-family:Inter,Segoe UI,Arial;margin:24px;background:#f6f7fb}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(20,20,50,0.06)}
+img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+label{display:block;margin:8px 0 4px;font-weight:600}
+input[type=number]{width:100%;padding:8px;border-radius:6px;border:1px solid #d6d9e6}
+button{margin-top:10px;padding:10px 14px;border-radius:8px;border:0;background:#2563eb;color:white;font-weight:700;cursor:pointer}
+.result{margin-top:10px;padding:10px;border-radius:8px;background:#f3f6ff}
+.muted{color:#6b7280;font-size:0.9rem}
+</style>
+</head>
+<body>
+<h1>Classic Pinoy Snacks — Place an Order</h1>
+<p class="muted">Three classic snacks revived for the demo. Enter cash and quantity then press <strong>Buy</strong>.</p>
+
+
+<div class="grid">
+<div class="card" data-snack-id="szz">
+<img src="https://nesabel.com/cdn/shop/products/160198718-manila-ph-nov-6-sizzling-bangus-fish-crackers-on-november-6-2020-in-manila-philippines-_1_98346c4f-d9e5-492f-b65b-eb14d4683446_1200x1200.jpg?v=1653847890">
+<h2> Sizzling Bangus</h2>
+<p class="muted">Price: <strong>₱1.50</strong> each</p>
+
+
+<form class="snack-form">
+<label>Cash (PHP)</label>
+<input name="cash" type="number" step="0.01" min="0" placeholder="e.g. 50">
+<label>Quantity</label>
+<input name="quantity" type="number" min="1" step="1" value="1">
+<button type="submit">Buy</button>
+</form>
+<div class="result" aria-live="polite" style="display:none"></div>
+</div>
+
+
+<!-- Card 2: Coco Puffs (local brand) -->
+<div class="card" data-snack-id="lmp">
+<img src="https://cdn.store-assets.com/s/377840/i/49949328.jpeg">
+<h2>Lumpia</h2>
+<p class="muted">Price: <strong>₱14.00</strong> each</p>
+
+
+<form class="snack-form">
+<label>Cash (PHP)</label>
+<input name="cash" type="number" step="0.01" min="0" placeholder="e.g. 100">
+<label>Quantity</label>
+<input name="quantity" type="number" min="1" step="1" value="1">
+<button type="submit">Buy</button>
+</form>
+<div class="result" aria-live="polite" style="display:none"></div>
+</div>
+
+
+<!-- Card 3: Barrio Barbecue Rings -->
+<div class="card" data-snack-id="mkmk">
+<img src="https://jaazmall.myshopify.com/cdn/shop/products/robinsons_330606_330606-1_e1b74eb8-3a8a-4fb7-b3ab-514ffea2b67c_480x.jpg?v=1508168369">
+<h2>Mik Mik</h2>
+<p class="muted">Price: <strong>₱45.00</strong> each</p>
+
+
+<form class="snack-form">
+<label>Cash (PHP)</label>
+<input name="cash" type="number" step="0.01" min="0" placeholder="e.g. 200">
+<label>Quantity</label>
+<input name="quantity" type="number" min="1" step="1" value="1">
+<button type="submit">Buy</button>
+</form>
+<div class="result" aria-live="polite" style="display:none"></div>
+</div>
+</div>
+<script>
+// Snack prices (must match the API)
+const SNACKS = {
+szz: { name: "Sizzling Bangus", price: 1.50 },
+lmp: { name: "Lumpia", price: 14.0 },
+mkmk: { name: "Mik Mik", price: 45.0 }
+};
+
+
+// Attach handlers to each form
+document.querySelectorAll('.card').forEach(card => {
+const form = card.querySelector('.snack-form');
+const result = card.querySelector('.result');
+const snackId = card.dataset.snackId;
+
+
+form.addEventListener('submit', async (e) => {
+e.preventDefault();
+result.style.display = 'none';
+result.textContent = '';
+
+
+const cashInput = form.elements['cash'];
+const qtyInput = form.elements['quantity'];
+const cash = cashInput.value.trim();
+const quantity = qtyInput.value.trim();
+
+
+// Simple client-side validation for emptiness
+if (cash === '' || quantity === '') {
+showResult('Please fill both fields.', false);
+return;
+}
+
+
+// Build payload
+const payload = { snackId, cash: parseFloat(cash), quantity: parseInt(quantity, 10) };
+
+
+// Disable UI while waiting
+const btn = form.querySelector('button');
+btn.disabled = true;
+btn.textContent = 'Processing...';
+
+
+try {
+const res = await fetch('api/order.php', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(payload)
+});
+
+
+if (!res.ok) throw new Error('Network response not ok');
+
+
+const data = await res.json();
+
+
+if (data.success) {
+showResult(`✔ ${data.message}\nSnack: ${data.snackName}\nQuantity: ${data.quantity} x ₱${data.unitPrice.toFixed(2)} = ₱${data.total.toFixed(2)}\nCash: ₱${data.cash.toFixed(2)}\nChange: ₱${data.change.toFixed(2)}`, true);
+} else {
+showResult('✖ ' + data.message, false);
+}
+
+
+} catch (err) {
+showResult('Request failed: ' + err.message, false);
+} finally {
+btn.disabled = false;
+btn.textContent = 'Buy';
+}
+
+
+function showResult(message, ok) {
+result.style.display = 'block';
+result.textContent = message;
+result.style.border = ok ? '1px solid #86efac' : '1px solid #fda4af';
+result.style.background = ok ? '#f0fdf4' : '#fff1f2';
+result.style.whiteSpace = 'pre-wrap';
+}
+});
+});
+</script>
