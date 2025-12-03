@@ -1,0 +1,57 @@
+<div x-data="reportModule()" x-init="fetchReports">
+
+    <!-- Report Table -->
+    <table id="reportTable">
+        <tbody>
+            <template x-for="row in rows" :key="row.id">
+                <tr>
+                    <td x-text="row.id"></td>
+                    <td x-html="formatItems(row.items_json)"></td>
+                    <td x-text="Number(row.total).toFixed(2)"></td>
+                    <td x-text="row.username"></td>
+                    <td x-text="formatDate(row.date_added)"></td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+
+    <h3>Total: <span id="grandTotal" x-text="grandTotal"></span> PHP</h3>
+
+</div>
+
+<script>
+function reportModule() {
+    return {
+        rows: [],
+        grandTotal: "0.00",
+
+        async fetchReports() {
+            try {
+                const form = document.getElementById('filterForm');
+                const params = new URLSearchParams(new FormData(form));
+
+                const res = await fetch(`../api/reports.php?${params.toString()}`);
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                this.rows = data.rows;
+                this.grandTotal = Number(data.total_sum).toFixed(2);
+
+            } catch (error) {
+                Swal.fire('Error', error.message, 'error');
+            }
+        },
+
+        formatItems(items) {
+            return items
+                .map(i => `${i.name} x${i.qty} (${Number(i.price).toFixed(2)} PHP)`)
+                .join('<br>');
+        },
+
+        formatDate(d) {
+            return new Date(d).toLocaleDateString();
+        }
+    }
+}
+</script>

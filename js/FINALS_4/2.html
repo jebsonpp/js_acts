@@ -1,0 +1,48 @@
+<div x-data="adminCreator()">
+
+    <!-- Access Denied Message -->
+    <div 
+        class="alert alert-danger" 
+        x-show="accessDenied"
+    >
+        Only superadmin can manage users.
+    </div>
+
+    <!-- Create Admin Form -->
+    <form @submit.prevent="createAdmin" x-show="!accessDenied">
+        <input type="text" x-model="username" placeholder="Username" class="form-control">
+        <input type="password" x-model="password" placeholder="Password" class="form-control mt-2">
+
+        <button type="submit" class="btn btn-primary mt-3" 
+            x-text="loading ? 'Creating...' : 'Create Admin'">
+        </button>
+    </form>
+
+</div>
+
+<script>
+function adminCreator() {
+  return {
+    username: '',
+    password: '',
+    accessDenied: false,
+    loading: false,
+
+    async createAdmin() {
+      this.loading = true;
+      const form = new FormData();
+      form.append('username', this.username);
+      form.append('password', this.password);
+      form.append('create', 1);
+
+      const res = await fetch('create_admin.php', {
+        method: 'POST',
+        body: form
+      });
+
+      // After PHP creates the admin, redirect.
+      window.location = 'users.php';
+    }
+  }
+}
+</script>

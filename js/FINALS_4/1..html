@@ -1,0 +1,43 @@
+<form 
+    x-data="productForm()" 
+    @submit.prevent="submitForm"
+    enctype="multipart/form-data"
+>
+    <input type="file" @change="previewImage">
+    <img x-show="preview" :src="preview" class="w-32">
+
+    <input type="text" x-model="name">
+    <input type="number" x-model="price">
+    <input type="text" x-model="category">
+    
+    <button type="submit" x-text="loading ? 'Saving...' : 'Save Product'"></button>
+</form>
+
+<script>
+function productForm() {
+  return {
+    preview: null,
+    name: '',
+    price: '',
+    category: '',
+    loading: false,
+
+    previewImage(e) {
+      const file = e.target.files[0];
+      this.preview = URL.createObjectURL(file);
+    },
+
+    async submitForm() {
+      this.loading = true;
+      const form = new FormData($event.target);
+
+      await fetch('add_product.php', {
+        method: 'POST',
+        body: form
+      });
+
+      window.location = 'products.php';
+    }
+  }
+}
+</script>
